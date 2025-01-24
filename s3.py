@@ -39,3 +39,13 @@ class File:
             print(obj['Body'].read().decode('utf-8'))
         except Exception as e:
             raise Exception(f"Error printing file contents: {e}")
+if __name__ == "__main__":
+
+    bucket_name = "api3-bucket"
+    bucket = Bucket(bucket_name=bucket_name)
+
+    if bucket.bucket_exists():
+        print(f"Bucket '{bucket_name}' exists.")
+        bucket.print_txt_files()
+    else:
+        print(f"Bucket '{bucket_name}' does not exist.")
