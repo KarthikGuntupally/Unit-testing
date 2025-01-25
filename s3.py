@@ -12,24 +12,18 @@ class Bucket:
         except Exception:
             return False
 
-    def print_txt_files(self):
+    def list_files(self):
         try:
             response = self.s3_client.list_objects_v2(Bucket=self.bucket_name)
-            files = [obj['Key'] for obj in response.get('Contents', [])]
-            for file_key in files:
-                if file_key.endswith('.txt'):
-                    print(f"Contents of {file_key}:")
-                    obj = self.s3_client.get_object(Bucket=self.bucket_name, Key=file_key)
-                    print(obj['Body'].read().decode('utf-8'))
-        except Exception as e:
-            raise Exception(f"Error printing .txt files: {e}")
-
+            return [obj['Key'] for obj in response.get('Contents', [])]
+        except Exception:
+            return []
 
 class File:
     def __init__(self, file_key: str):
         self.file_key = file_key
 
-    def check_if_file_is_txt_file(self) -> bool:
+    def is_txt_file(self) -> bool:
         return self.file_key.endswith('.txt')
 
     def print_contents(self, bucket_name: str):
@@ -38,14 +32,24 @@ class File:
             obj = s3_client.get_object(Bucket=bucket_name, Key=self.file_key)
             print(obj['Body'].read().decode('utf-8'))
         except Exception as e:
-            raise Exception(f"Error printing file contents: {e}")
-if __name__ == "__main__":
+            print(f"Error reading file {self.file_key}: {e}")
 
-    bucket_name = "api3-bucket"
-    bucket = Bucket(bucket_name=bucket_name)
+if __name__ == "__main__":
+    bucket_name = "api1-bucket"
+    bucket = Bucket(bucket_name)
 
     if bucket.bucket_exists():
         print(f"Bucket '{bucket_name}' exists.")
-        bucket.print_txt_files()
+        files = bucket.list_files()
+
+        if files:
+            print(f"Found files: {', '.join(files)}")
+            for file_key in files:
+                file = File(file_key)
+                if file.is_txt_file():
+                    print(f"\nContents of {file_key}:")
+                    file.print_contents(bucket_name)
+        else:
+            print("The bucket is empty.")
     else:
         print(f"Bucket '{bucket_name}' does not exist.")
