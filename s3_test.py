@@ -23,8 +23,7 @@ class TestBucket(unittest.TestCase):
         self.assertTrue(bucket.bucket_exists())
 
     @patch('boto3.client')
-    @patch('builtins.print')
-    def test_bucket_with_txt_files(self, mock_print, mock_boto_client):
+    def test_bucket_with_txt_files(self, mock_boto_client):
         mock_s3_client = MagicMock()
         mock_boto_client.return_value = mock_s3_client
         mock_s3_client.list_objects_v2.return_value = {
