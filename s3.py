@@ -34,22 +34,32 @@ class File:
         except Exception as e:
             print(f"Error reading file {self.file_key}: {e}")
 
-if __name__ == "__main__":
+def handle_txt_file(bucket_name, file_key):
+    file = File(file_key)
+    if file.is_txt_file():
+        print(f"\nContents of {file_key}:")
+        file.print_contents(bucket_name)
+
+def process_files(bucket_name, files):
+    if not files:
+        print("The bucket is empty.")
+        return
+    print(f"Found files: {', '.join(files)}")
+    for file_key in files:
+        handle_txt_file(bucket_name, file_key)
+
+def main():
     bucket_name = "api1-bucket"
     bucket = Bucket(bucket_name)
 
-    if bucket.bucket_exists():
-        print(f"Bucket '{bucket_name}' exists.")
-        files = bucket.list_files()
-
-        if files:
-            print(f"Found files: {', '.join(files)}")
-            for file_key in files:
-                file = File(file_key)
-                if file.is_txt_file():
-                    print(f"\nContents of {file_key}:")
-                    file.print_contents(bucket_name)
-        else:
-            print("The bucket is empty.")
-    else:
+    if not bucket.bucket_exists():
         print(f"Bucket '{bucket_name}' does not exist.")
+        return
+
+    print(f"Bucket '{bucket_name}' exists.")
+    files = bucket.list_files()
+    process_files(bucket_name, files)
+
+if __name__ == "__main__":
+    main()
+
